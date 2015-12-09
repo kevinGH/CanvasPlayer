@@ -1,0 +1,11 @@
+F:\201411\CanvasPlayer\Player\Player\bin\Player.dll.config
+F:\201411\CanvasPlayer\Player\Player\bin\Player.dll
+F:\201411\CanvasPlayer\Player\Player\bin\Player.pdb
+F:\201411\CanvasPlayer\Player\Player\obj\Debug\Player.csprojResolveAssemblyReference.cache
+F:\201411\CanvasPlayer\Player\Player\obj\Debug\Player.dll
+F:\201411\CanvasPlayer\Player\Player\obj\Debug\Player.pdb
+F:\TestCode\CanvasPlayer\Player\Player\bin\Player.dll
+F:\TestCode\CanvasPlayer\Player\Player\bin\Player.pdb
+F:\TestCode\CanvasPlayer\Player\Player\obj\Debug\Player.csprojResolveAssemblyReference.cache
+F:\TestCode\CanvasPlayer\Player\Player\obj\Debug\Player.dll
+F:\TestCode\CanvasPlayer\Player\Player\obj\Debug\Player.pdb

@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            background-color: black;
+        }
+    </style>
+    <script src="Scripts/jquery-2.1.1.js"></script>
+
+</head>
+<body>
+    
+    <canvas id="output" width="640" height="480"></canvas>
+    <br />
+    <input type="text" name="fps" id="fps" value="1" />
+    <input type="text" name="resolution" id="resolution" value="320240" />
+    <input type="text" name="starttime" id="endtime" value="1419465601000" />
+    <input type="text" name="endtime" id="endtime" value="1419465649000" />
+    <br />
+    <input type="button" name="open" id="open" value="open" />
+    <input type="button" name="play" id="play" value="play" />
+    <input type="button" name="pause" id="pause" value="pause" />
+    <input type="button" name="stop" id="stop" value="stop" />
+    <input type="button" name="previous" id="previous" value="previous frame" />
+    <input type="button" name="next" id="next" value="next frame" />
+    <input type="button" name="close" id="close" value="close" />
+    <input type="button" name="snapshot" id="snapshot" value="snapshot" />
+    <input type="button" name="big" id="big" value="big" />
+    <input type="button" name="small" id="small" value="small" />
+    <script>
+        var Player = function (htmlCanvas, param, w, h) {
+            this.htmlCanvas = htmlCanvas;
+            this.htmlCanvas.width = w;
+            this.htmlCanvas.height = h;
+            this.startTime = (param.startTime) ? param.startTime : new Date();
+            this.endTime = (param.endTime) ? param.endTime : new Date();
+            this.fps = (param.fps) ? param.fps : "1";
+            this.resolutionWidth = (param.resolutionWidth) ? param.resolutionWidth : 320;
+            this.resolutionHeight = (param.resolutionHeight) ? param.resolutionHeight : 240;
+            this.playTime = new Date(this.startTime.getTime());
+            this.isPlay = false;
+            this.playInterval;
+            this.ctx = this.htmlCanvas.getContext("2d");
+            this.ctx.font = "20px arial";
+            this.ctx.fillStyle = "white";
+            this.repeat = false;
+            this.requestSpeed = 1000 / this.fps;
+            var that = this;
+
+            this.open = function () {
+                playFrame();
+            };
+
+            this.close = function () {
+                clearInterval(that.playInterval);
+                that.isPlay = false;
+                that.playTime = new Date(that.startTime.getTime());
+                that.ctx.clearRect(0, 0, that.htmlCanvas.width, that.htmlCanvas.height);
+            };
+
+            this.nextFrame = function () {
+                //console.log("next" + that.playTime.getTime());
+                that.playTime.setMilliseconds(that.playTime.getMilliseconds() + (1000 / parseInt(that.fps)));
+                
+                playFrame();
+            };
+
+            this.previousFrame = function () {
+                //console.log("previous" + that.playTime.getTime());
+                that.playTime.setMilliseconds(that.playTime.getMilliseconds() - (1000 / parseInt(that.fps)));
+
+                playFrame();
+            };
+
+            this.pause = function () {
+                if (that.isPlay) {
+                    clearInterval(that.playInterval);
+                    that.isPlay = false;
+                }
+            };
+
+            this.stop = function () {
+                clearInterval(that.playInterval);
+                that.isPlay = false;
+                that.playTime = new Date(that.startTime.getTime());
+                that.ctx.clearRect(0, 0, that.htmlCanvas.width, that.htmlCanvas.height);
+
+                playFrame();
+            };
+
+            this.play = function () {
+                if (!that.isPlay) {
+                    that.isPlay = true;
+                    that.playInterval = setInterval(function () { that.nextFrame() }, that.requestSpeed);
+                }
+            };
+
+            this.smartPlay = function () {
+
+            };
+
+            this.changeSize = function(w, h){
+                that.htmlCanvas.width = w;
+                that.htmlCanvas.height = h;
+                that.ctx.font = "20px arial";
+                that.ctx.fillStyle = "white";
+
+            };
+            function playFrame() {
+                console.log("play" + that.playTime.getTime());
+                var myImage = new Image();
+                myImage.time = that.playTime.getTime();
+                myImage.src = "source/fps" + that.fps + "r" + that.resolutionWidth.toString() + that.resolutionHeight.toString() + "/" + that.playTime.getTime().toString() + ".png";
+
+                var d = new Date(that.playTime.getTime);
+                drawText(that.playTime.toLocaleString() + "(" + that.playTime.getTime() + ")");
+                myImage.onload = function () {
+                    drawImg(myImage);
+                    var d = new Date(this.time);
+                    drawText(d.toLocaleString() + "(" + d.getTime() + ")");
+                };
+
+                // repeat
+                if (that.playTime.getTime() == that.endTime.getTime()){
+                    if (that.repeat)
+                        that.playTime = new Date(that.startTime.getTime());
+                    else{
+                        that.pause();
+                    }
+                }
+            }
+            function drawImg(img) {
+                that.ctx.drawImage(img, 0, 0, that.htmlCanvas.width, that.htmlCanvas.height);
+            }
+
+            function drawText(time) {
+                that.ctx.fillText(time, 0, that.htmlCanvas.height);
+            }
+
+        }
+
+        $(document).ready(function () {
+            
+            var player = new Player(document.getElementById("output"), { startTime: new Date(1419465600000), endTime: new Date(1419465649000), fps: "10", resolutionWidth: 640, resolutionHeight: 480 }, 640, 480);
+            
+
+            $("#open").click(function () {
+                player.open();
+            });
+            $("#close").click(function () {
+                player.close();
+            });
+            $("#play").click(function () {
+                player.play();
+            });
+            $("#next").click(function () {
+                player.nextFrame();
+            });
+            $("#previous").click(function () {
+                player.previousFrame();
+            });
+            $("#pause").click(function () {
+                player.pause();
+            });
+            $("#stop").click(function () {
+                player.stop();
+            });
+            $("#big").click(function () {
+                player.changeSize(640, 480);
+            });
+            $("#small").click(function () {
+                player.changeSize(320, 240);
+            });
+        });
+    </script>
+</body>
+</html>

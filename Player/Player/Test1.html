@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <style>
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas {
+            border: 1px solid black;
+            background-color: white;
+        }
+    </style>
+    <script src="Scripts/jquery-2.1.1.min.js"></script>
+</head>
+<body>
+    <canvas id="output" width="640" height="480"></canvas>
+    <br />
+    <input type="text" name="fps" id="fps" value="1" />
+    <input type="text" name="resolution" id="resolution" value="320240" />
+    <input type="text" name="starttime" id="endtime" value="1419465601000" />
+    <input type="text" name="endtime" id="endtime" value="1419465649000" />
+    <br />
+    <input type="button" name="open" id="open" value="open" />
+    <input type="button" name="play" id="play" value="play" />
+    <input type="button" name="pause" id="pause" value="pause" />
+    <input type="button" name="stop" id="stop" value="stop" />
+    <input type="button" name="previous" id="previous" value="previous frame" />
+    <input type="button" name="next" id="next" value="next frame" />
+    <input type="button" name="close" id="close" value="close" />
+    <input type="button" name="snapshot" id="snapshot" value="snapshot" />
+    <input type="button" name="big" id="big" value="big" />
+    <input type="button" name="small" id="small" value="small" />
+    <br />
+    <script>
+        var StartTime = new Date(1419465600000); // 2014/12/25 08:00:00
+        var EndTime = new Date(1419465649000); // 2014/12/25 08:00:49
+        var PlayTime = new Date(StartTime.getTime());
+        var output, ctx;
+        var playInterval;
+        var fps;
+        var resolution;
+        var isPlay = false;
+
+        $(document).ready(function () {
+            output = document.getElementById("output");
+            ctx = output.getContext("2d");
+            ctx.font = "20px arial";
+            ctx.fillStyle = "white";
+
+            output.onclick = function () {
+                if (!isPlay) {
+                    isPlay = true;
+                    if (PlayTime.getTime() == EndTime.getTime())
+                        PlayTime = new Date(StartTime.getTime());
+                    fps = $("#fps").val();
+                    resolution = $("#resolution").val();
+                    console.log(1000 / fps);
+                    playInterval = setInterval("PlayTime.setMilliseconds(PlayTime.getMilliseconds() + (1000 / parseInt(fps)));playFrame()", 1000 / fps);
+                }
+                else {
+                    isPlay = false;
+                    clearInterval(playInterval);
+                }
+            };
+
+            $("#open").click(function () {
+                if (!isPlay) {
+                    fps = $("#fps").val();
+                    resolution = $("#resolution").val();
+                    
+                    playFrame();
+                }
+            });
+
+            $("#play").click(function () {
+                if (!isPlay) {
+                    isPlay = true;
+                    if (PlayTime.getTime() == EndTime.getTime())
+                        PlayTime = new Date(StartTime.getTime());
+                    fps = $("#fps").val();
+                    resolution = $("#resolution").val();
+                    console.log(1000 / fps);
+                    playFrame();
+                    playInterval = setInterval("PlayTime.setMilliseconds(PlayTime.getMilliseconds() + (1000 / parseInt(fps)));playFrame();playFrame()", 1000 / fps);
+                }
+            });
+
+            $("#pause").click(function () {
+                if (isPlay) {
+                    isPlay = false;
+                    clearInterval(playInterval);
+                }
+            });
+
+            $("#stop").click(function () {
+                isPlay = false;
+                clearInterval(playInterval);
+                PlayTime = new Date(StartTime.getTime());
+                ctx.clearRect(0, 0, output.width, output.height);
+                playFrame();
+            });
+
+            $("#previous").click(function () {
+                isPlay = false;
+                clearInterval(playInterval);
+                
+                PlayTime.setMilliseconds(PlayTime.getMilliseconds() - (1000 / parseInt(fps)));
+                playFrame();
+            });
+
+            $("#next").click(function () {
+                isPlay = false;
+                clearInterval(playInterval);
+
+                PlayTime.setMilliseconds(PlayTime.getMilliseconds() + (1000 / parseInt(fps)));                
+                playFrame();
+            });
+
+            $("#snapshot").click(function () {
+                ctx.getImageData(0, 0, output.width, output.height);
+
+                var img = document.createElement("img");
+                img.src = output.toDataURL("image/png");
+                document.body.appendChild(img);                
+            });
+
+            $("#close").click(function () {
+                isPlay = false;
+                clearInterval(playInterval);
+                PlayTime = new Date(StartTime.getTime());
+                ctx.clearRect(0, 0, output.width, output.height);
+            });
+
+            $("#big").click(function () {
+                output.width = 640;
+                output.height = 480;
+                ctx = output.getContext("2d");
+                ctx.font = "20px arial";
+                ctx.fillStyle = "white";
+            });
+
+            $("#small").click(function () {
+                output.width = 320;
+                output.height = 240;
+                //ctx = output.getContext("2d");
+                ctx.font = "20px arial";
+                ctx.fillStyle = "white";
+            });
+        });
+
+        function playFrame() {
+            console.log(PlayTime.getTime());
+
+            if (PlayTime.getTime() == EndTime.getTime()) {
+                PlayTime = new Date(StartTime.getTime());
+                //isPlay = false;
+                //clearInterval(playInterval);
+            }
+
+            var myImage = new Image(320, 240);
+            myImage.time = PlayTime.getTime();
+            myImage.src = "source/fps" + fps + "r" + resolution + "/" + PlayTime.getTime().toString() + ".png";
+            
+            myImage.onload = function () {
+                drawImg(myImage);
+                var d = new Date(this.time);
+                drawText(d.toLocaleString() + "(" + PlayTime.getTime() + ")");
+            };
+
+        }
+
+        function drawImg(img) {
+            console.log(img.src);
+            ctx.drawImage(img, 0, 0, output.width, output.height);
+            
+        }
+        function drawText(time) {
+            ctx.fillText(time, 0, output.height);
+        }
+    </script>
+</body>
+</html>
